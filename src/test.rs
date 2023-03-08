@@ -1,5 +1,5 @@
-use crate::contact::Contact;
 
+use serde::{Serialize, Deserialize};
 pub fn test() {
     let t: Contact = Contact {
         name: String::from(""),
