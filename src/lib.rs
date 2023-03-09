@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::fs::{File, self};
 use std::io::Write;
 use serde::{Serialize, Deserialize};
 
@@ -31,9 +31,23 @@ impl Contact {
     }
     pub fn serialize(&self) {
         let serialized = serde_json::to_string(self).unwrap();
-        let filename = format!("contacts/{}.json", self.name);
+        let filename = format!("contacts/{}.json", self.name.replace('\n', ""));
         let mut file = File::create(filename).expect("Unable to create file");
         file.write_all(serialized.as_bytes()).expect("Unable to write data");
+    }
+    pub fn read(path: String) -> Result<Contact, &'static str>{
+        let data = fs::read_to_string(path)
+            .expect("Unable to read file");
+        let json: serde_json::Value = serde_json::from_str(&data)
+        .   expect("JSON does not have correct format.");
+        let name = ("{}", json["name"].as_str().unwrap()).1;
+        let description = ("{}", json["description"].as_str().unwrap()).1;
+        let link = ("{}", json["link"].as_str().unwrap()).1;
+
+        let args = Contact::from([name, description, link]);
+        
+        return Contact::new(&args);
+
     }
     pub fn open_link(&self) {
         match open::that(&self.link) {
