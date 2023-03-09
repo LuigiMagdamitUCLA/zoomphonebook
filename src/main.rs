@@ -1,20 +1,23 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-extern crate colored;
+
 
 use phonebook::Contact;
-
+use phonebook::cli::show_art;
 use std::env;
 use std::process;
+use glob::glob;
 
-use colored::*;
 fn main() {
+
     let args: Vec<String> = env::args().collect();
     let command = &args[1];
-
+    show_art();
     if command == &String::from("create") {
-        show_art();
         enter_contact_info();
+    }
+    if command == &String::from("show") {
+        show_contacts();
     }
 }
 
@@ -45,13 +48,12 @@ fn enter_contact_info() {
 
     contact.serialize();
 }
-fn show_art() {
-    let text = (" _______  __   __  _______  __    _  _______  _______  _______  _______  ___   _ 
-    |       ||  | |  ||       ||  |  | ||       ||  _    ||       ||       ||   | | |
-    |    _  ||  |_|  ||   _   ||   |_| ||    ___|| |_|   ||   _   ||   _   ||   |_| |
-    |   |_| ||       ||  | |  ||       ||   |___ |       ||  | |  ||  | |  ||      _|
-    |    ___||       ||  |_|  ||  _    ||    ___||  _   | |  |_|  ||  |_|  ||     |_ 
-    |   |    |   _   ||       || | |   ||   |___ | |_|   ||       ||       ||    _  |
-    |___|    |__| |__||_______||_|  |__||_______||_______||_______||_______||___| |_|").bold();
-    println!("{}", text);
+
+fn show_contacts() {
+    for entry in glob("./contacts/*.json").expect("msg") {
+        match entry {
+            Ok(path) => println!("{:?}", path.display()),
+            Err(e) => println!("{:?}", e),
+        }
+    }
 }
