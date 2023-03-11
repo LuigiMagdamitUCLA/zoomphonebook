@@ -13,8 +13,7 @@ fn main() {
 
     let args: Vec<String> = env::args().collect();
     let command = &args[1];
-    dbg!(&args.len());
-    let spec = if args.len() < 4 {
+    let spec = if args.len() == 3 {
         Some(&args[2])
     } else {
         None
@@ -27,10 +26,9 @@ fn main() {
         show_contacts();
     }
     if command == "read" {
-        dbg!(spec);
         match spec {
             Some(spec_final) => command_read(spec_final),
-            _ => (println!("Needs second argument!"))
+            _ => println!("Needs second argument!")
         }
         
     }
