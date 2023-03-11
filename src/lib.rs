@@ -66,6 +66,7 @@ impl Contact {
     }
 }
 
+
 pub mod commands {
     pub fn command_read(spec: &str) {
         let path = format!("./contacts/{}.json", spec); 
