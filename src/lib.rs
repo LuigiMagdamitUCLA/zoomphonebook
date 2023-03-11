@@ -92,6 +92,31 @@ pub mod commands {
             show:\t to show all contact files\n
             start [name]:\t to open the zoom link at [name]\n");
     }
+    pub fn new_contact(args: &[String]) -> super::Contact {
+        let c = super::Contact::new(args).unwrap_or_else(|err| {
+            println!("Problem parsing arguments: {err}");
+            std::process::exit(1);
+        });
+        return c;
+    }
+    pub fn enter_contact_info() {
+        let mut name_line = String::new();
+        let mut desc_line = String::new();
+        let mut link_line = String::new();
+    
+        println!("Enter contact name");
+        std::io::stdin().read_line(&mut name_line).unwrap();
+        println!("Enter description");
+        std::io::stdin().read_line(&mut desc_line).unwrap();
+        println!("Enter link");
+        std::io::stdin().read_line(&mut link_line).unwrap();
+    
+        let args: [String; 3] = [name_line, desc_line, link_line];
+    
+        let contact: super::Contact = new_contact(&args);
+    
+        contact.serialize();
+    }
 }
 pub mod cli {
     pub fn show_art() {
