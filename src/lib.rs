@@ -31,13 +31,20 @@ impl Contact {
         ].to_vec();
         input
     }
+    pub fn print_data(&self) {
+        println!("
+            Name: {}
+            Description: {},
+            Link: {},
+        ", self.name, self.description, self.link);
+    }
     pub fn serialize(&self) {
         let serialized = serde_json::to_string(self).unwrap();
         let filename = format!("contacts/{}.json", self.name.replace('\n', ""));
         let mut file = File::create(filename).expect("Unable to create file");
         file.write_all(serialized.as_bytes()).expect("Unable to write data");
     }
-    pub fn read(path: String) -> Result<Contact, &'static str>{
+    pub fn read(path: &str) -> Result<Contact, &'static str>{
         let data = fs::read_to_string(path)
             .expect("Unable to read file");
         let json: serde_json::Value = serde_json::from_str(&data)
@@ -59,6 +66,33 @@ impl Contact {
     }
 }
 
+pub mod commands {
+    pub fn command_read(spec: &str) {
+        let path = format!("./contacts/{}.json", spec); 
+        let contact_read = super::Contact::read(&path);
+        
+        match contact_read {
+            Ok(contact_success) => contact_success.print_data(),
+            Err(err) => println!("{}", err)
+       }
+    }
+    pub fn command_start(spec: &str) {
+        let path = format!("./contacts/{}.json", spec); 
+        let contact_read = super::Contact::read(&path);
+
+        match contact_read {
+            Ok(contact_success) => contact_success.open_link(),
+            Err(err) => println!("{}", err)
+       }
+    }
+    pub fn command_help() {
+        println!("These are the commands \n
+            create:\tto enter contact creation prompt\n
+            read [name]:\t to access contact file at [name]\n
+            show:\t to show all contact files\n
+            start [name]:\t to open the zoom link at [name]\n");
+    }
+}
 pub mod cli {
     pub fn show_art() {
         let text = " _______  __   __  _______  __    _  _______  _______  _______  _______  ___   _ 
