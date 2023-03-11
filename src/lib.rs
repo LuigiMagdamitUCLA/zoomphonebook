@@ -67,6 +67,51 @@ impl Contact {
 }
 
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Appointment {
+    pub name: String,
+    pub description: String,
+    pub day: String,
+    pub time: String
+}
+
+impl Appointment {
+    pub fn new(args: &[String]) -> Result<Appointment, &'static str> {
+        if args.len() != 4 {
+            return Err("Not enough arguments")
+        }
+        let name = args[0].clone();
+        let description = args[1].clone();
+        let day = args[2].clone();
+        let time = args[3].clone();
+
+        Ok( Appointment { name: name, description: description, day: day, time: time })
+    }
+    pub fn from(args: [&str; 4]) -> Vec<String> {
+        let input: Vec<String> = [
+            String::from(args[0]),
+            String::from(args[1]),
+            String::from(args[2]),
+            String::from(args[3]),
+        ].to_vec();
+        input
+    }
+    pub fn serialize(&self) {
+        let serialized = serde_json::to_string(self).unwrap();
+        let filename = format!("./appointments/{}-{}-{}.json", self.name.replace('\n', ""), self.day.replace('\n', ""), self.time.replace('\n', ""));
+        let mut file = File::create(filename).expect("Unable to create file");
+        file.write_all(serialized.as_bytes()).expect("Unable to write data");
+    }
+    pub fn print_data(&self) {
+        println!("
+            Name: {}
+            Description: {},
+            Day: {},
+            Time: {},
+        ", self.name, self.description, self.day, self.time);
+    }
+}
+
 pub mod commands {
     pub fn command_read(spec: &str) {
         let path = format!("./contacts/{}.json", spec); 
@@ -100,6 +145,14 @@ pub mod commands {
         });
         return c;
     }
+    pub fn new_appointment(args: &[String]) -> super::Appointment {
+        let c = super::Appointment::new(args).unwrap_or_else(|err| {
+            println!("Problem parsing arguments: {err}");
+            std::process::exit(1);
+        });
+        c.print_data();
+        return c;
+    }
     pub fn enter_contact_info() {
         let mut name_line = String::new();
         let mut desc_line = String::new();
@@ -116,6 +169,29 @@ pub mod commands {
     
         let contact: super::Contact = new_contact(&args);
     
+        contact.serialize();
+    }
+
+    pub fn enter_appointment_info() {
+        let mut name_line = String::new();
+        let mut desc_line = String::new();
+        let mut day_line = String::new();
+        let mut time_line = String::new();
+    
+        println!("Enter contact name");
+        std::io::stdin().read_line(&mut name_line).unwrap();
+        println!("Enter description");
+        std::io::stdin().read_line(&mut desc_line).unwrap();
+        println!("Enter day [MM-DD-YYYY]");
+        std::io::stdin().read_line(&mut day_line).unwrap();
+        println!("Enter time [24:00]");
+        std::io::stdin().read_line(&mut time_line).unwrap();
+        
+    
+        let args: [String; 4] = [name_line, desc_line, day_line, time_line];
+    
+        let contact: super::Appointment = new_appointment(&args);
+        
         contact.serialize();
     }
 }
